@@ -10,5 +10,7 @@ class chooes extends Model
     use HasFactory;
     protected $guarded=[];
     public $timestamps=false;
-
+public function levell(){
+    return $this->belongsTo(Level::class);
+}
 }

@@ -7,7 +7,7 @@ use App\Http\Controllers\truefalseController;
 use Illuminate\Support\Facades\Route;
 
 
-Route::middleware('auth:sanctum')->group(callback: function (){
+Route::middleware('auth:sanctum')->group(function (){
     Route::apiResource('level',LevelController::class);
     Route::apiResource('truefalse',truefalseController::class);
     Route::get('gettruefalsedit/{id}',[truefalseController::class,'gettruefalsedit']);

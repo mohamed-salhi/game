@@ -31,7 +31,7 @@ class chooesresourse extends JsonResource
                 "answartrue"=> $this->answartrue,
                 "status"=>in_array($this->id, $c)?
                     $this->check($this->level_id,$user->id,$this->id)
-                    :'false'
+                    :'nurmal'
 
         ];
     }
@@ -41,10 +41,10 @@ if ($stats->stats=='true'){
     return 'true';
 }elseif($stats->stats=='skip'){
     return 'skip';
-}elseif($stats->stats=='nurmal'){
-    return 'nurmal';
-}else{
+}elseif($stats->stats=='false'){
     return 'false';
+}else{
+    return 'nurmal';
 }
     }
 }

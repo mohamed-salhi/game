@@ -6,18 +6,19 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class authController extends Controller
 {
     public function login(Request $request){
         $request->validate([
-            'email'=>'required|email|max:255',
+            'data'=>'required|max:255',
             'password'=>'required|min:6',
 
         ]);
 
-        $user=User::where('email',$request->email)->first();
-        if($user && Hash::check($request->password,$user->password)){
+        $user=User::where('email',$request->data)->orWhere('name',$request->data)->first();
+        if(  $user && Hash::check($request->password,$user->password)){
 
             $device_name=$request->post('device_name',$request->userAgent());
             $token=$user->createToken($device_name);
@@ -29,6 +30,7 @@ class authController extends Controller
         }
         return response()->json([
             'massage'=> 'userName OR Passworf Faild',
+            'status'=>401
 
         ],401);
 
@@ -38,9 +40,16 @@ class authController extends Controller
 
         $request->validate([
             'name'=>'required|string|between:2,100',
+            'sex'=>[
+                'required',
+                Rule::in(['male','female']),
+            ],
+            'country'=>'required|string|between:2,50',
+            'date'=>'required|date_format:m-d-Y',
             'email'=>'required|string|email|max:255|unique:users,email',
             'password'=>'required|min:6',
         ]);
+
         $data=$request->except('password');
         $password=Hash::make($request->password);
         $data['password']=$password;

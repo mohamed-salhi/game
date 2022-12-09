@@ -140,6 +140,7 @@ $user->score;
 
 
     public function getqustion($id){
+
 //        $user=Auth::guard('sanctum')->user();
 //
 //        $t=soulion::whereNotNull('true_false_id')->where('level_id',$id)->where('user_id',$user->id)->pluck('true_false_id');
@@ -155,7 +156,13 @@ $user->score;
 //                $qurey->whereNotIn('id',$c);
 //            }
 //        ])->get();
-
+       $level=Level::find($id);
+       if(!$level){
+           return Response()->json([
+               'massage'=> "level ".$id." not found",
+               'status'=>404
+           ]);
+       }
         $data=Level::where('id',$id)->with(
             'true_false')->with(
             'choosee')->get();
@@ -173,22 +180,34 @@ $user->score;
 
     public function postqustionsoultion(Request $request){
         $request->validate([
-            'level_id'=>'required|integer|exists:levels,id',
             'true_false_id'=>'nullable|integer|exists:true_falses,id',
             'chooe_id'=>'nullable|integer|exists:chooes,id',
             'stats'=>[
                 'required',
-                Rule::in(['nurmal', 'false','true','skip']),
+                Rule::in(['false','true','skip']),
             ]
 
         ]);
-        $power=0;
-        if ($request->has('chooe_id')){
-            $power= chooes::find($request->chooe_id)->score;
-        }else{
-            $power= TrueFalse::find($request->true_false_id)->score;
-        }
         $user=Auth::guard('sanctum')->user();
+
+
+        if ($request->has('chooe_id')){
+            $data=chooes::find($request->chooe_id);
+            $check=soulion::where('chooe_id',$request->chooe_id)->where('level_id',$data->level_id)->where('user_id',$user->id)->exists();
+            if ($check){
+                return 'this in exist in table';
+            }
+            $power=$data->score;
+        }else{
+            $data=TrueFalse::find($request->true_false_id);
+            $check=soulion::where('true_false_id',$request->true_false_id)->where('level_id',$data->level_id)->where('user_id',$user->id)->exists();
+            if ($check){
+                return 'this in exist in table';
+            }
+
+            $power=$data->score;
+        }
+
         $score=$user->score;
         if ($request->stats=='true'){
             $user->update([
@@ -201,6 +220,7 @@ $user->score;
         }
 $request->merge([
    'user_id'=>$user->id,
+    'level_id'=>$data->level_id
 ]);
         soulion::updateOrCreate($request->all());
         return Response()->json([
